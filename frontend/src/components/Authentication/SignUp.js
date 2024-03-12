@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FormControl, FormLabel, VStack, Input, InputGroup, Button, InputRightElement, useToast } from '@chakra-ui/react';
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
 const SignUp = () => {
   const [show, setShow] = useState(false);
@@ -11,6 +12,7 @@ const SignUp = () => {
   const [pic, setPic] = useState();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const history = useHistory();
 
   const handleClick = () => setShow(!show);
 
@@ -28,7 +30,7 @@ const SignUp = () => {
       return;
     }
 
-    if (pic.type == "image/jpeg" || pic.type === "image/png") {
+    if (pic.type === "image/jpeg" || pic.type === "image/png") {
       const data = new FormData();
       data.append("file", pic);
       data.append("upload_preset", "chat-app");
@@ -72,7 +74,7 @@ const SignUp = () => {
       setLoading(false);
       return;
     }
-    if (password != confirmpassword) {
+    if (password !== confirmpassword) {
       toast({
         title: "Passwords Do Not Match",
         status: "warning",
@@ -95,8 +97,27 @@ const SignUp = () => {
         { name, email, password, pic },
         config
       );
-    } catch (error) {
+      toast({
+        title: "Registration Successful",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom"
+      });
 
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setLoading(false);
+      history.push('/chats');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.response.data.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom"
+      });
+      setLoading(false);
     }
   }
 
