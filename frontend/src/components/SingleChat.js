@@ -114,7 +114,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           config
         );
         
-        console.log(data);
         
         socket.emit('new message', data);
         setMessages([...messages, data]);
@@ -209,7 +208,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 </div>
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-              {console.log(isTyping)}
               {isTyping ? <div>
                 <Lottie
                   options={defaultOptions}

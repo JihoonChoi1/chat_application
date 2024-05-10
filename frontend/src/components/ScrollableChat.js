@@ -1,5 +1,5 @@
-import React from 'react'
-import ScrollableFeed from 'react-scrollable-feed';
+import React from 'react';
+import { useRef, useEffect } from 'react';
 import { ChatState } from '../Context/ChatProvider';
 import {
   isLastMessage,
@@ -11,11 +11,18 @@ import { Avatar } from "@chakra-ui/avatar";
 import { Tooltip } from "@chakra-ui/tooltip";
 
 const ScrollableChat = ({ messages }) => {
-  
+  const chatParent = useRef(null);
   const { user } = ChatState();
 
+  useEffect(() => {
+    const domNode = chatParent.current;
+    if (domNode) {
+      domNode.scrollTop = domNode.scrollHeight;
+    }
+  });
+
   return (
-    <div style={{ overflowX: "hidden", overflowY: "auto" }}>
+    <div ref={chatParent} style={{ overflowX: "hidden", overflowY: "auto" }}>
       {messages && messages.map((m, i) => (
         <div style={{display: "flex"}} key={m._id}>
           {(isSameSender(messages, m, i, user._id) ||
@@ -49,6 +56,7 @@ const ScrollableChat = ({ messages }) => {
       ))}
     </div>
   )
+
 }
 
 export default ScrollableChat
