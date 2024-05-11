@@ -98,7 +98,7 @@ const GroupChatModal = ({ children }) => {
       toast({
         title: "Failed to Create the Chat!",
         description: error.response.data,
-        status: "serror",
+        status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom"
