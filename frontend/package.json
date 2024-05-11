@@ -22,7 +22,8 @@
     "react-scrollable-feed": "^2.0.1",
     "socket.io-client": "^4.7.5",
     "tar": "^7.0.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
