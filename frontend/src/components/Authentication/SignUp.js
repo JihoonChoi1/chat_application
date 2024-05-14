@@ -2,10 +2,9 @@ import React, { useState } from 'react'
 import { FormControl, FormLabel, VStack, Input, InputGroup, Button, InputRightElement, useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import { ChatState } from '../../Context/ChatProvider';
 
 const SignUp = () => {
-  const { setUser } = ChatState();
+  //const { setUser } = ChatState();
   const [show, setShow] = useState(false);
   const [name, setName] = useState();
   const [email, setEmail] = useState();
@@ -95,7 +94,7 @@ const SignUp = () => {
         }
       };
 
-      const { data } = await axios.post("/api/user",
+      await axios.post("/api/user",
         { name, email, password, pic },
         config
       );
@@ -107,10 +106,10 @@ const SignUp = () => {
         position: "bottom"
       });
 
-      localStorage.setItem('userInfo', JSON.stringify(data));
-      setUser(JSON.parse(localStorage.getItem("userInfo")));
+      // localStorage.setItem('userInfo', JSON.stringify(data));
+      // setUser(JSON.parse(localStorage.getItem("userInfo")));
       setLoading(false);
-      history.push('/chats');
+      history.push('/');
     } catch (error) {
       toast({
         title: "Error",

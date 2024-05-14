@@ -1,18 +1,8 @@
 import React from 'react'
 import { Container, Box, Text} from '@chakra-ui/react';
-import Login from '../components/Authentication/Login';
-import { useHistory } from "react-router-dom";
-import { useEffect } from 'react';
+import SignUp from '../components/Authentication/SignUp';
 
-const Homepage = () => {
-  const history = useHistory();
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-    if (user) {
-      history.push("/chats");
-    }
-  }, [history]);
-
+const SignUpPage = () => {
   return (
     <Container maxW="xl" centerContent>
       <Box
@@ -36,10 +26,10 @@ const Homepage = () => {
         borderRadius="lg"
         borderWidth="1px"
       >
-        <Login />
+        <SignUp />
       </Box>
     </Container>
   )
 }
 
-export default Homepage
+export default SignUpPage

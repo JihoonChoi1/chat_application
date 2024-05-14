@@ -4,6 +4,8 @@ import { useToast } from "@chakra-ui/react";
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
 import { ChatState } from '../../Context/ChatProvider';
+import { Link as ReactRouterLink } from 'react-router-dom'
+import { Link as ChakraLink} from '@chakra-ui/react'
 
 
 const Login = () => {
@@ -39,6 +41,44 @@ const Login = () => {
 
       const { data } = await axios.post("/api/user/login",
         { email, password },
+        config
+      );
+      toast({
+        title: "Login Successful",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom"
+      });
+
+      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUser(JSON.parse(localStorage.getItem("userInfo")));
+      setLoading(false);
+
+      history.push('/chats');
+    } catch (error) {
+      toast({
+        title: "Error Occured",
+        description: error.response.data.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom"
+      });
+      setLoading(false);
+    }
+  }
+
+  const guestSubmitHandler = async () => {
+    try {
+      const config = {
+        headers: {
+          "Content-type": "application/json"
+        }
+      };
+
+      const { data } = await axios.post("/api/user/login",
+        { email: "guest@example.com", password: "123456"},
         config
       );
       toast({
@@ -109,14 +149,13 @@ const Login = () => {
       <Button
         colorScheme="green"
         width="100%"
-        onClick={() => {
-          setEmail("guest@example.com");
-          setPassword("123456");
-        }}
+        onClick={guestSubmitHandler}
       >
         Log in as a guest
       </Button>
-
+      <div>
+          <ChakraLink color='teal.500' as={ReactRouterLink} to='/signup'>Create Account</ChakraLink>
+      </div>
     </VStack>
   )
 }
