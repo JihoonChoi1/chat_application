@@ -1,4 +1,4 @@
-# Talkative
+# Chatting Application
 
 Real-time one-on-one and group chat. Node/Express/Socket.IO backend, React (Vite) frontend.
 
