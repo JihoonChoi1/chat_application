@@ -1,88 +1,79 @@
 const express = require('express');
-const { chats } = require("./data/data");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
-const chatRoutes = require("./routes/chatRoutes");
-const messageRoutes = require("./routes/messageRoutes");
-const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const dotenv = require('dotenv');
 const path = require('path');
+const connectDB = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
-
-const app = express();
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 connectDB();
 
-app.use(express.json());
+const app = express();
 
+app.use(express.json());
 
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/message', messageRoutes);
 
-// Deployment
+const rootDir = path.resolve();
 
-const __dirname1 = path.resolve();
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname1, "/frontend/build")));
+  app.use(express.static(path.join(rootDir, 'frontend', 'dist')));
 
   app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
+    res.sendFile(path.resolve(rootDir, 'frontend', 'dist', 'index.html'));
   });
 } else {
-  app.get("/", (req, res) => {
-  res.send("API is Running");
-});
+  app.get('/', (req, res) => {
+    res.send('API is Running');
+  });
 }
-  
-// Deployment
 
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8000;
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
-
-const server = app.listen(3000, console.log(`Server started on PORT ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server started on PORT ${PORT}`));
 
 const io = require('socket.io')(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3001"
-  }
-})
+    origin: CLIENT_URL,
+  },
+});
 
-io.on("connection", (socket) => {
-  //console.log('connected to socket.io');
-
+io.on('connection', (socket) => {
   socket.on('setup', (userData) => {
     socket.join(userData._id);
     socket.emit('connected');
-  })
+  });
 
   socket.on('join chat', (room) => {
     socket.join(room);
-    console.log("User Joined Room: " + room);
-  })
+  });
 
   socket.on('typing', (room) => socket.in(room).emit('typing'));
   socket.on('stop typing', (room) => socket.in(room).emit('stop typing'));
 
   socket.on('new message', (newMessageReceived) => {
-    var chat = newMessageReceived.chat;
+    const chat = newMessageReceived.chat;
     if (!chat.users) {
       return console.log('chat.users not defined');
     }
-    chat.users.forEach(user => {
-      if (user._id == newMessageReceived.sender._id) {
+    chat.users.forEach((user) => {
+      if (user._id === newMessageReceived.sender._id) {
         return;
       }
-      socket.in(user._id).emit("message received", newMessageReceived);
+      socket.in(user._id).emit('message received', newMessageReceived);
     });
   });
 
-  socket.off("setup", () => {
-    console.log("USER DISCONNECTED");
-    socket.leave(userData._id);
+  socket.on('disconnect', () => {
+    socket.removeAllListeners();
   });
 });

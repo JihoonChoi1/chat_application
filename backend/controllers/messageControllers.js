@@ -20,18 +20,24 @@ const sendMessage = asyncHandler(async (req, res) => {
   try {
     var message = await Message.create(newMessage);
 
-    message = await message.populate("sender", "name pic");
+    message = await message.populate("sender", "name");
     message = await message.populate("chat");
     message = await User.populate(message, {
       path: 'chat.users',
-      select: 'name pic email'
+      select: 'name email'
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, {
-      latestMessage: message
+      latestMessage: message._id
     });
 
-    res.json(message);
+    // Reflect this message as the chat's latestMessage in the response without
+    // creating a circular reference (message.chat.latestMessage === message).
+    const responseMessage = message.toObject();
+    const { chat, ...messageWithoutChat } = responseMessage;
+    responseMessage.chat = { ...chat, latestMessage: messageWithoutChat };
+
+    res.json(responseMessage);
   } catch (error) {
     res.status(400);
     throw new Error(error.message);
@@ -41,7 +47,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 const allMessages = asyncHandler(async (req, res) => {
   try {
     const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name pic")
+      .populate("sender", "name")
       .populate("chat");
     
     res.json(messages);

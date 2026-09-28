@@ -3,7 +3,7 @@ const User = require("../Models/userModel");
 const generateToken = require("../config/generateToken");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, pic } = req.body;
+  const { name, email, password } = req.body;
   if (!name || !email || !password) {
     res.status(400);
     throw new Error("Please Enter all the Fields");
@@ -20,7 +20,6 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
-    pic,
   });
 
   if (user) {
@@ -28,7 +27,6 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      pic: user.pic,
       token: generateToken(user._id),
     })
   } else {
@@ -46,7 +44,6 @@ const authUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      pic: user.pic,
       token: generateToken(user._id),
     })
   } else {
@@ -55,16 +52,20 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 // /api/user?search=jihoon
 const allUsers = asyncHandler(async (req, res) => {
   const keyword = req.query.search ? {
     $or: [
-      { name: { $regex: req.query.search, $options: "i" } },
-      { email: { $regex: req.query.search, $options: "i" } }
+      { name: { $regex: escapeRegex(req.query.search), $options: "i" } },
+      { email: { $regex: escapeRegex(req.query.search), $options: "i" } }
     ]
   } : {};
 
-  const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+  const users = await User.find(keyword)
+    .find({ _id: { $ne: req.user._id } })
+    .select("-password");
   res.send(users);
 });
 
